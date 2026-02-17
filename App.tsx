@@ -2,32 +2,23 @@ import React, { useState, useRef, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import MoonBackground from './components/MoonBackground';
 import { Button, Input, Label, Card } from './components/UIComponents';
-import { generateCreativeContent } from './services/geminiService';
-import { QRContentType } from './types';
-import { Download, Sparkles, Moon, Wand2, Type, Link, Wifi, Mail, Palette } from 'lucide-react';
+import { QRContentType, ECLevel } from './types';
+import { Download, Type, Link, Wifi, Mail, Settings2, Moon } from 'lucide-react';
 
 const App: React.FC = () => {
-  const [content, setContent] = useState<string>('https://gemini.google.com');
+  const [content, setContent] = useState<string>('https://google.com');
   const [contentType, setContentType] = useState<QRContentType>(QRContentType.URL);
-  const [prompt, setPrompt] = useState<string>('');
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [fgColor, setFgColor] = useState<string>('#e2e8f0'); // Slate-200
+  
+  // Customization State
+  const [fgColor, setFgColor] = useState<string>('#f8fafc'); // Slate-50
   const [bgColor, setBgColor] = useState<string>('#020617'); // Slate-950
+  const [ecLevel, setEcLevel] = useState<ECLevel>('M');
   
   // Specific fields
   const [wifiSsid, setWifiSsid] = useState('');
   const [wifiPass, setWifiPass] = useState('');
   
   const qrRef = useRef<HTMLDivElement>(null);
-
-  const handleGeminiGenerate = async () => {
-    if (!prompt) return;
-    setIsGenerating(true);
-    const text = await generateCreativeContent(prompt);
-    setContent(text);
-    setContentType(QRContentType.TEXT);
-    setIsGenerating(false);
-  };
 
   const handleDownload = () => {
     const svg = qrRef.current?.querySelector('svg');
@@ -42,7 +33,7 @@ const App: React.FC = () => {
         ctx?.drawImage(img, 0, 0);
         const pngFile = canvas.toDataURL("image/png");
         const downloadLink = document.createElement("a");
-        downloadLink.download = "moon-qr.png";
+        downloadLink.download = `luna-qr-${Date.now()}.png`;
         downloadLink.href = pngFile;
         downloadLink.click();
       };
@@ -57,216 +48,218 @@ const App: React.FC = () => {
   }, [wifiSsid, wifiPass, contentType]);
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col relative">
+    <div className="min-h-screen flex flex-col relative selection:bg-indigo-500/30">
       <MoonBackground />
 
-      {/* Header */}
-      <header className="relative z-10 w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-white/10 rounded-full backdrop-blur-sm">
-            <Moon className="w-6 h-6 text-indigo-300 fill-indigo-300/20" />
+      {/* Elegant Header */}
+      <header className="relative z-10 w-full pt-8 pb-4 px-6 flex justify-between items-center max-w-7xl mx-auto border-b border-white/5">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center shadow-lg shadow-indigo-500/10 border border-white/5">
+            <Moon className="w-5 h-5 text-slate-200" />
           </div>
-          <h1 className="text-2xl font-light tracking-wide">
-            Luna<span className="font-semibold text-indigo-300">QR</span>
-          </h1>
+          <div>
+            <h1 className="text-xl font-medium tracking-[0.2em] text-slate-100">
+              LUNA
+            </h1>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500">Generator</p>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-8 items-start justify-center">
+      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto p-6 md:py-12 flex flex-col lg:flex-row gap-12 items-start justify-center">
         
-        {/* Left Column: Controls */}
-        <div className="w-full lg:w-1/2 space-y-6">
-          <Card className="space-y-6">
-            <div>
-              <Label>Content Type</Label>
-              <div className="grid grid-cols-4 gap-2 mt-2">
-                {[
-                  { id: QRContentType.URL, icon: Link, label: 'URL' },
-                  { id: QRContentType.TEXT, icon: Type, label: 'Text' },
-                  { id: QRContentType.WIFI, icon: Wifi, label: 'WiFi' },
-                  { id: QRContentType.EMAIL, icon: Mail, label: 'Email' },
-                ].map((type) => (
-                  <button
-                    key={type.id}
-                    onClick={() => setContentType(type.id as QRContentType)}
-                    className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
-                      contentType === type.id 
-                        ? 'bg-indigo-600/20 border-indigo-500/50 text-white shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
-                        : 'bg-slate-800/30 border-slate-700/50 text-slate-400 hover:bg-slate-800/50'
-                    }`}
-                  >
-                    <type.icon className="w-5 h-5 mb-1" />
-                    <span className="text-xs">{type.label}</span>
-                  </button>
-                ))}
-              </div>
+        {/* Left Column: Configuration */}
+        <div className="w-full lg:w-5/12 space-y-8">
+          
+          <section>
+            <div className="flex items-center gap-2 mb-6 text-indigo-400">
+              <Settings2 className="w-4 h-4" />
+              <span className="text-xs font-semibold uppercase tracking-wider">Configuration</span>
             </div>
 
-            {/* Input Fields based on Type */}
-            <div className="space-y-4">
-              {contentType === QRContentType.URL && (
-                <div>
-                  <Label>Website URL</Label>
-                  <Input 
-                    placeholder="https://example.com"
-                    value={content.startsWith('http') || content.startsWith('WIFI') ? content : ''}
-                    onChange={(e) => setContent(e.target.value)}
-                  />
+            <Card className="space-y-8">
+              {/* Type Selector */}
+              <div>
+                <Label>Data Type</Label>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {[
+                    { id: QRContentType.URL, icon: Link, label: 'URL' },
+                    { id: QRContentType.TEXT, icon: Type, label: 'Text' },
+                    { id: QRContentType.WIFI, icon: Wifi, label: 'WiFi' },
+                    { id: QRContentType.EMAIL, icon: Mail, label: 'Email' },
+                  ].map((type) => (
+                    <button
+                      key={type.id}
+                      onClick={() => setContentType(type.id as QRContentType)}
+                      className={`group flex flex-col items-center justify-center p-4 rounded-lg border transition-all duration-300 ${
+                        contentType === type.id 
+                          ? 'bg-slate-800 border-indigo-500/50 text-indigo-200' 
+                          : 'bg-transparent border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-300'
+                      }`}
+                    >
+                      <type.icon className={`w-5 h-5 mb-2 transition-transform duration-300 ${contentType === type.id ? 'scale-110' : 'group-hover:scale-110'}`} />
+                      <span className="text-[10px] font-medium tracking-wide">{type.label}</span>
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {contentType === QRContentType.TEXT && (
-                <div>
-                  <Label>Text Content</Label>
-                  <textarea 
-                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-colors outline-none min-h-[120px] resize-none"
-                    placeholder="Enter your message..."
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {contentType === QRContentType.WIFI && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Input Fields */}
+              <div className="space-y-6">
+                {contentType === QRContentType.URL && (
                   <div>
-                    <Label>Network Name (SSID)</Label>
+                    <Label>Destination URL</Label>
                     <Input 
-                      placeholder="MyWifi"
-                      value={wifiSsid}
-                      onChange={(e) => setWifiSsid(e.target.value)}
+                      placeholder="https://example.com"
+                      value={content.startsWith('http') || content.startsWith('WIFI') ? content : ''}
+                      onChange={(e) => setContent(e.target.value)}
                     />
                   </div>
+                )}
+
+                {contentType === QRContentType.TEXT && (
                   <div>
-                    <Label>Password</Label>
-                    <Input 
-                      type="password"
-                      placeholder="********"
-                      value={wifiPass}
-                      onChange={(e) => setWifiPass(e.target.value)}
+                    <Label>Plain Text</Label>
+                    <textarea 
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-600 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all outline-none font-light min-h-[140px] resize-none"
+                      placeholder="Enter your content..."
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
                     />
                   </div>
-                </div>
-              )}
+                )}
 
-              {contentType === QRContentType.EMAIL && (
+                {contentType === QRContentType.WIFI && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label>SSID (Network Name)</Label>
+                      <Input 
+                        placeholder="Network Name"
+                        value={wifiSsid}
+                        onChange={(e) => setWifiSsid(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Password</Label>
+                      <Input 
+                        type="password"
+                        placeholder="Network Password"
+                        value={wifiPass}
+                        onChange={(e) => setWifiPass(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {contentType === QRContentType.EMAIL && (
+                  <div>
+                    <Label>Recipient Email</Label>
+                    <Input 
+                      placeholder="contact@domain.com"
+                      value={content.includes('@') ? content : ''}
+                      onChange={(e) => setContent(`mailto:${e.target.value}`)}
+                    />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </section>
+
+          <section>
+            <Card>
+               <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <Label>Email Address</Label>
-                  <Input 
-                    placeholder="hello@moon.com"
-                    value={content.includes('@') ? content : ''}
-                    onChange={(e) => setContent(`mailto:${e.target.value}`)}
-                  />
+                  <Label>Foreground</Label>
+                  <div className="flex items-center gap-3 mt-2 group cursor-pointer">
+                    <div className="w-10 h-10 rounded-full border border-slate-700 p-0.5 overflow-hidden relative">
+                       <input 
+                        type="color" 
+                        value={fgColor}
+                        onChange={(e) => setFgColor(e.target.value)}
+                        className="absolute -top-2 -left-2 w-16 h-16 cursor-pointer"
+                      />
+                    </div>
+                    <span className="text-xs font-mono text-slate-400">{fgColor}</span>
+                  </div>
                 </div>
-              )}
-            </div>
-          </Card>
-
-          {/* AI Generation Card */}
-          <Card className="relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-amber-200" />
-                <h3 className="text-lg font-medium text-amber-50">Ask the Moon</h3>
-              </div>
-              <p className="text-slate-400 text-sm mb-4">
-                Not sure what to say? Let the stars guide your message. Generate a poem, a greeting, or a cryptic note.
-              </p>
-              <div className="flex gap-2">
-                <Input 
-                  placeholder="e.g., A love poem for Luna" 
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="!bg-slate-800/50"
-                  onKeyDown={(e) => e.key === 'Enter' && handleGeminiGenerate()}
-                />
-                <Button 
-                  onClick={handleGeminiGenerate} 
-                  isLoading={isGenerating}
-                  disabled={!prompt}
-                  variant="primary"
-                >
-                  <Wand2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          {/* Styling Options */}
-          <Card>
-            <div className="flex items-center gap-2 mb-4">
-              <Palette className="w-5 h-5 text-slate-300" />
-              <h3 className="text-lg font-medium text-slate-200">Eclipse Styles</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Code Color</Label>
-                <div className="flex items-center gap-2 mt-1">
-                  <input 
-                    type="color" 
-                    value={fgColor}
-                    onChange={(e) => setFgColor(e.target.value)}
-                    className="w-8 h-8 rounded cursor-pointer bg-transparent border-none"
-                  />
-                  <span className="text-xs text-slate-400 font-mono">{fgColor}</span>
+                <div>
+                  <Label>Background</Label>
+                  <div className="flex items-center gap-3 mt-2 group cursor-pointer">
+                    <div className="w-10 h-10 rounded-full border border-slate-700 p-0.5 overflow-hidden relative">
+                       <input 
+                        type="color" 
+                        value={bgColor}
+                        onChange={(e) => setBgColor(e.target.value)}
+                        className="absolute -top-2 -left-2 w-16 h-16 cursor-pointer"
+                      />
+                    </div>
+                    <span className="text-xs font-mono text-slate-400">{bgColor}</span>
+                  </div>
                 </div>
               </div>
-              <div>
-                <Label>Background</Label>
-                <div className="flex items-center gap-2 mt-1">
-                  <input 
-                    type="color" 
-                    value={bgColor}
-                    onChange={(e) => setBgColor(e.target.value)}
-                    className="w-8 h-8 rounded cursor-pointer bg-transparent border-none"
-                  />
-                  <span className="text-xs text-slate-400 font-mono">{bgColor}</span>
+              
+              <div className="mt-8 pt-6 border-t border-white/5">
+                <Label>Error Correction</Label>
+                <div className="flex justify-between gap-2 mt-2">
+                  {(['L', 'M', 'Q', 'H'] as ECLevel[]).map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => setEcLevel(level)}
+                      className={`flex-1 py-2 text-xs font-medium rounded transition-colors ${
+                        ecLevel === level 
+                        ? 'bg-slate-800 text-indigo-300' 
+                        : 'text-slate-600 hover:text-slate-400'
+                      }`}
+                    >
+                      {level}
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          </section>
         </div>
 
         {/* Right Column: Preview */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center">
-          <div className="sticky top-10 w-full max-w-md">
-            <div className="relative group">
-              {/* Glow Effect behind QR */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+        <div className="w-full lg:w-5/12 flex flex-col items-center">
+          <div className="sticky top-10 w-full max-w-sm">
+            
+            <Label className="text-center mb-6 !ml-0">Live Preview</Label>
+
+            <div className="relative group perspective-[1000px]">
               
-              <div ref={qrRef} className="relative bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl flex items-center justify-center aspect-square">
+              <div ref={qrRef} className="relative bg-slate-900/80 backdrop-blur-3xl border border-white/10 p-10 rounded-2xl shadow-2xl flex items-center justify-center aspect-square transition-transform duration-500 hover:rotate-x-2">
                  {/* QR Rendering */}
-                 <div className="bg-white rounded-lg p-2" style={{ backgroundColor: bgColor }}>
+                 <div className="bg-white p-4 rounded-sm shadow-inner" style={{ backgroundColor: bgColor }}>
                     <QRCodeSVG 
-                      value={content || "https://gemini.google.com"} 
-                      size={256}
+                      value={content || "https://google.com"} 
+                      size={240}
                       fgColor={fgColor}
                       bgColor={bgColor}
-                      level="H"
+                      level={ecLevel}
                       includeMargin={false}
                     />
                  </div>
                  
-                 {/* Corner Accents */}
-                 <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-indigo-400/50 rounded-tl-xl m-4" />
-                 <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-indigo-400/50 rounded-tr-xl m-4" />
-                 <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-indigo-400/50 rounded-bl-xl m-4" />
-                 <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-indigo-400/50 rounded-br-xl m-4" />
+                 {/* Decorative Frame Markers */}
+                 <div className="absolute top-4 left-4 w-2 h-2 border-t border-l border-slate-500/50" />
+                 <div className="absolute top-4 right-4 w-2 h-2 border-t border-r border-slate-500/50" />
+                 <div className="absolute bottom-4 left-4 w-2 h-2 border-b border-l border-slate-500/50" />
+                 <div className="absolute bottom-4 right-4 w-2 h-2 border-b border-r border-slate-500/50" />
               </div>
             </div>
 
-            <div className="mt-8 flex justify-center w-full">
-              <Button onClick={handleDownload} className="w-full text-lg group">
-                <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
-                <span>Save to Gallery</span>
+            <div className="mt-10 flex flex-col gap-4">
+              <Button onClick={handleDownload} fullWidth variant="primary" className="h-12 text-base shadow-indigo-500/20 shadow-lg">
+                <Download className="w-4 h-4" />
+                <span>Export PNG</span>
               </Button>
+              <p className="text-center text-[10px] text-slate-600 uppercase tracking-widest">
+                High Resolution Output
+              </p>
             </div>
 
-            <div className="mt-6 text-center text-sm text-slate-500">
-              <p>Generated codes work best with high contrast colors.</p>
-            </div>
           </div>
         </div>
       </main>
