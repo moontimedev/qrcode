@@ -27,6 +27,8 @@ const App: React.FC = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       const img = new Image();
+      
+      // Use standard browser styling for background to ensure transparency works if desired
       img.onload = () => {
         canvas.width = img.width;
         canvas.height = img.height;
@@ -37,7 +39,10 @@ const App: React.FC = () => {
         downloadLink.href = pngFile;
         downloadLink.click();
       };
-      img.src = "data:image/svg+xml;base64," + btoa(svgData);
+
+      // Robust base64 encoding that handles unicode characters
+      const b64 = btoa(unescape(encodeURIComponent(svgData)));
+      img.src = "data:image/svg+xml;base64," + b64;
     }
   };
 
