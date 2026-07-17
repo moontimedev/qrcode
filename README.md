@@ -2,19 +2,31 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# LunaQR — Elegant QR Generator
 
-This contains everything you need to run your app locally.
+A fast, moon-themed QR code generator. Pick a data type, style it, and export a
+crisp PNG or SVG — no account, no tracking, everything runs in the browser.
 
-View your app in AI Studio: https://ai.studio/apps/drive/16LFAmYyGnVlXzZjd-X1B0EuAGDgNW5Rg
+## Features
+
+- **8 data types** — URL, Text, WiFi, Email (subject + body), Phone, SMS, Contact (vCard), and Location.
+- **Live preview** with a real-time **scannability indicator** (contrast check).
+- **Themes & custom colors** — one-tap presets plus foreground/background pickers.
+- **Center logo** — drop in an image; error correction auto-locks to H for reliable scanning.
+- **High-res export** — PNG (512 / 1024 / 2048 px), vector **SVG**, or **copy to clipboard**.
+- **Advanced controls** — error-correction level and quiet-zone margin, tucked away until you need them.
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Run the app:
    `npm run dev`
+3. Build for production:
+   `npm run build`
+
+## Tech
+
+React 19 · Vite · Tailwind · [`qrcode.react`](https://github.com/zpao/qrcode.react) · [`lucide-react`](https://lucide.dev)
